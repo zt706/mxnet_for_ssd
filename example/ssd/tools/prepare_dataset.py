@@ -5,7 +5,8 @@ import subprocess
 curr_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(os.path.join(curr_path, '..'))
 from dataset.pascal_voc import PascalVoc
-from dataset.mscoco import Coco
+from dataset.tupu_face import TupuFace
+#from dataset.mscoco import Coco
 from dataset.concat_db import ConcatDB
 
 def load_pascal(image_set, year, devkit_path, shuffle=False):
@@ -42,6 +43,34 @@ def load_pascal(image_set, year, devkit_path, shuffle=False):
     imdbs = []
     for s, y in zip(image_set, year):
         imdbs.append(PascalVoc(s, y, devkit_path, shuffle, is_train=True))
+    if len(imdbs) > 1:
+        return ConcatDB(imdbs, shuffle)
+    else:
+        return imdbs[0]
+
+def load_tupu_face(image_set, devkit_path, json_list_path, shuffle=False):
+    """
+    wrapper function for loading tupu face dataset
+
+    Parameters:
+    ----------
+    image_set : str
+        train, trainval...
+    devkit_path : str
+        full path of json list
+    shuffle : bool
+        whether to shuffle initial list
+
+    Returns:
+    ----------
+    Imdb
+    """
+    image_set = [y.strip() for y in image_set.split(',')]
+    assert image_set, "No image_set specified"
+
+    imdbs = []
+    for s in image_set:
+        imdbs.append(TupuFace(s, devkit_path, json_list_path, shuffle, is_train=True))
     if len(imdbs) > 1:
         return ConcatDB(imdbs, shuffle)
     else:
@@ -98,6 +127,18 @@ if __name__ == '__main__':
         db.save_imglist(args.target, root=args.root_path)
     elif args.dataset == 'coco':
         db = load_coco(args.set, args.root_path, args.shuffle)
+        print("saving list to disk...")
+        db.save_imglist(args.target, root=args.root_path)
+    elif args.dataset == 'tupu_face':
+        if args.set == 'trainval':
+            json_list_path = '/world/data-c5/zhouji_demo_3_15/tf_mul_objdect_dir/multi_task/face_record/15015795631820.7563693316016269_list_train.json'
+        elif args.set == 'test':
+            json_list_path = '/world/data-c5/zhouji_demo_3_15/tf_mul_objdect_dir/multi_task/face_record/15015795631820.7563693316016269_list_val.json'
+        else:
+            print('json list path is none, exit')
+            exit()
+
+        db = load_tupu_face(args.set, args.root_path, json_list_path, args.shuffle)
         print("saving list to disk...")
         db.save_imglist(args.target, root=args.root_path)
     else:

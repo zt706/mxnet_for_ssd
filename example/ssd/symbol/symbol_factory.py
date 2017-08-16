@@ -15,6 +15,7 @@ def get_config(network, data_shape, **kwargs):
         extra arguments
     """
     if network == 'vgg16_reduced':
+        logging.info("Use network vgg16_reduced, shape {}".format(str(data_shape)))
         if data_shape >= 448:
             from_layers = ['relu4_3', 'relu7', '', '', '', '', '']
             num_filters = [512, -1, 512, 256, 256, 256, 256]
@@ -41,6 +42,7 @@ def get_config(network, data_shape, **kwargs):
             logging.warn('data_shape %d was not tested, use with caucious.' % data_shape)
         return locals()
     elif network == 'inceptionv3':
+        logging.info("Use network inceptionv3, shape {}".format(str(data_shape)))
         from_layers = ['ch_concat_mixed_7_chconcat', 'ch_concat_mixed_10_chconcat', '', '', '', '']
         num_filters = [-1, -1, 512, 256, 256, 128]
         strides = [-1, -1, 2, 2, 2, 2]
@@ -52,6 +54,7 @@ def get_config(network, data_shape, **kwargs):
         steps = []
         return locals()
     elif network == 'resnet50':
+        logging.info("Use network resnet50, shape {}".format('224'))
         num_layers = 50
         image_shape = '3,224,224'  # resnet require it as shape check
         network = 'resnet'
@@ -66,6 +69,7 @@ def get_config(network, data_shape, **kwargs):
         steps = []
         return locals()
     elif network == 'resnet101':
+        logging.info("Use network resnet101, shape {}".format('224'))
         num_layers = 101
         image_shape = '3,224,224'
         network = 'resnet'
